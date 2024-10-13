@@ -192,9 +192,12 @@ class Library {
      * @param  {object} criteria 
      */
     searchExact (criterias){
-        return Array.from(this.#books.entries()).filter(([book,_]) => 
-            Object.entries(criterias).every(([key, value]) => book[key] === value)
-         ).map(([_, books])=>books).flat();
+        //#NF:14 spread operator
+        //#NF:5 array methods (flatmap)
+        //#NF:15 short if ?:
+        return [...this.#books.entries()].flatMap(([book, books]) => 
+            Object.entries(criterias).every(([key, value]) => book[key] === value) ? books : []
+        );
     }
 
     searchRE (criterias){

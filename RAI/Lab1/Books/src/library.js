@@ -174,6 +174,16 @@ class Library {
     }
 
     /**
+     * 
+     * @param {LibraryBook} book
+     * @return {Account?} 
+     */
+    who_rented(book){
+        let entry = this.#ledger.get(book)?.at(-1);
+        return entry?.return_date === null ? entry.borrower : null
+    }
+
+    /**
      * @param {Array<LibraryBook>} books 
      */
     registerBooks (books){

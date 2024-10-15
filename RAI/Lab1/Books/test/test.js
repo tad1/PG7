@@ -180,6 +180,26 @@ describe('Library', function(){
         })
 
     });
+
+    describe('#who_rented', function(){
+        it('should return null for avaliable book', function(){
+            library.rent([libBooks[3]], dummyAccount)
+            library.return([libBooks[3]]);
+            
+            expect(library.who_rented(libBooks[3])).to.be.null;
+            // empty ledger edge-case
+            expect(library.who_rented(libBooks[1])).to.be.null;
+        });
+        it('should return null for invalid book', function(){            
+            expect(library.who_rented(new LibraryBook("L999", books[0]))).to.be.null;
+            expect(library.who_rented(null)).to.be.null;
+        });
+        it('should return person who rented', function(){
+            library.rent([libBooks[3]], dummyAccount)
+            expect(library.who_rented(libBooks[3])).equal(dummyAccount)
+        })
+    })
+
     describe('#registerBooks()', function(){
         it('should register books', function(){
             let dummyBook = new Book({"author":"Author", "title": "Title"})

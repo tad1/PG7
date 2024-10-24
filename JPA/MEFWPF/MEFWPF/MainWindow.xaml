@@ -6,15 +6,6 @@
         xmlns:local="clr-namespace:MEFWPF"
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
-    <DockPanel>
-        <WrapPanel DockPanel.Dock="Left">
-            <TextBox Width="100"></TextBox>
-            <TextBox Width="100"></TextBox>
-        </WrapPanel>
-        <StackPanel DockPanel.Dock="Left">
-            <Button Height="50" Width="100">Suma</Button>
-            <Button Height="50" Width="100">Iloczyn</Button>
-        </StackPanel>
-        <TextBlock Width="100" Height="100" DockPanel.Dock="Left"></TextBlock>
-    </DockPanel>
+<TabControl x:Name="TabControl">
+</TabControl>
 </Window>

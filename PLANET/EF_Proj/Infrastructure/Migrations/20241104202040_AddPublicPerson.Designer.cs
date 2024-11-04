@@ -3,6 +3,7 @@ using System;
 using Infrastructure;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
@@ -11,9 +12,11 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DomainContext))]
-    partial class DomainContextModelSnapshot : ModelSnapshot
+    [Migration("20241104202040_AddPublicPerson")]
+    partial class AddPublicPerson
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -34,12 +37,17 @@ namespace Infrastructure.Migrations
                     b.Property<Guid>("PersonId")
                         .HasColumnType("uuid");
 
+                    b.Property<Guid?>("PersonId1")
+                        .HasColumnType("uuid");
+
                     b.Property<decimal>("Salary")
                         .HasColumnType("numeric");
 
                     b.HasKey("Id");
 
                     b.HasIndex("PersonId");
+
+                    b.HasIndex("PersonId1");
 
                     b.ToTable("Employments");
                 });
@@ -119,10 +127,14 @@ namespace Infrastructure.Migrations
             modelBuilder.Entity("Domain.Employment", b =>
                 {
                     b.HasOne("Domain.Person", "Person")
-                        .WithMany("Employments")
+                        .WithMany()
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.HasOne("Domain.Person", null)
+                        .WithMany("Employments")
+                        .HasForeignKey("PersonId1");
 
                     b.OwnsOne("Domain.EmploymentType", "EmploymentType", b1 =>
                         {
@@ -161,6 +173,45 @@ namespace Infrastructure.Migrations
                         .WithOne()
                         .HasForeignKey("Domain.Person", "SpouseId");
 
+                    b.OwnsMany("Domain.Address", "Addresses", b1 =>
+                        {
+                            b1.Property<Guid>("PersonId")
+                                .HasColumnType("uuid");
+
+                            b1.Property<int>("Id")
+                                .ValueGeneratedOnAdd()
+                                .HasColumnType("integer");
+
+                            NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
+
+                            b1.Property<string>("City")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Country")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("State")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("Street")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.Property<string>("ZipCode")
+                                .IsRequired()
+                                .HasColumnType("text");
+
+                            b1.HasKey("PersonId", "Id");
+
+                            b1.ToTable("Address");
+
+                            b1.WithOwner()
+                                .HasForeignKey("PersonId");
+                        });
+
                     b.OwnsMany("Domain.PhoneNumber", "PhoneNumbers", b1 =>
                         {
                             b1.Property<Guid>("PersonId")
@@ -172,10 +223,6 @@ namespace Infrastructure.Migrations
 
                             NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b1.Property<int>("Id"));
 
-                            b1.Property<string>("Number")
-                                .IsRequired()
-                                .HasColumnType("text");
-
                             b1.HasKey("PersonId", "Id");
 
                             b1.ToTable("PhoneNumber");
@@ -183,6 +230,8 @@ namespace Infrastructure.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("PersonId");
                         });
+
+                    b.Navigation("Addresses");
 
                     b.Navigation("Father");
 

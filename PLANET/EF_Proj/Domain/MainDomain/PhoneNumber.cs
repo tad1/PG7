@@ -4,7 +4,7 @@ namespace Domain;
 
 public class PhoneNumber : ValueObject
 {
-    string Number { get; set; }
+    public string Number { get; set; }
 
     protected override IEnumerable<object> GetEqualityComponents()
     {

@@ -16,23 +16,22 @@ public class Employments
     }
     
     // CREATE
-    public record struct AddEmploymentCommand
+    public record AddEmploymentCommand
     {
         public Guid PersonId { get; init; }
-        public Guid CompanyId { get; init; }
+        public string CompanyName { get; init; }
         public EmploymentType Type { get; init; }
-        public double Salary { get; init; }
+        public decimal Salary { get; init; }
     }
     public Guid? AddEmployment(AddEmploymentCommand command)
     {
         var person = _context.People.Find(command.PersonId);
-        var company = _context.Companies.Find(command.CompanyId);
-        if (company == null || person == null) return null;
+        if (person == null) return null;
 
         var employment = new Employment
         {
             Id = Guid.NewGuid(),
-            Company = company,
+            CompanyName = command.CompanyName,
             Person = person,
             EmploymentType = command.Type,
             Salary = command.Salary
@@ -55,9 +54,7 @@ public class Employments
         return employment;
     }
     
-    // UPDATE
-    // UpdateSalary
-    // UpdateEmploymentType
+    // UPDATE - props are immutable
     
     // DELETE
     public void RemoveEmployment(Guid employmentId)
@@ -65,6 +62,7 @@ public class Employments
         var employment = _context.Employments.Find(employmentId);
         if (employment == null) return;
         _context.Employments.Remove(employment);
+        _context.SaveChanges();
     }
     // RemoveEmployment
 }

@@ -12,8 +12,8 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Infrastructure.Migrations
 {
     [DbContext(typeof(DomainContext))]
-    [Migration("20241103030809_Initial")]
-    partial class Initial
+    [Migration("20241104190443_NameToProp")]
+    partial class NameToProp
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -25,31 +25,19 @@ namespace Infrastructure.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("Domain.Company", b =>
-                {
-                    b.Property<Guid>("id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("id");
-
-                    b.ToTable("Companies");
-                });
-
             modelBuilder.Entity("Domain.Employment", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
-                    b.Property<Guid?>("Companyid")
-                        .HasColumnType("uuid");
+                    b.Property<string>("CompanyName")
+                        .HasColumnType("text");
 
                     b.Property<Guid?>("PersonId")
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid?>("PersonId1")
                         .HasColumnType("uuid");
 
                     b.Property<double>("Salary")
@@ -57,9 +45,9 @@ namespace Infrastructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Companyid");
-
                     b.HasIndex("PersonId");
+
+                    b.HasIndex("PersonId1");
 
                     b.ToTable("Employments");
                 });
@@ -73,15 +61,15 @@ namespace Infrastructure.Migrations
                     b.Property<Guid?>("FatherId")
                         .HasColumnType("uuid");
 
+                    b.Property<int>("Gender")
+                        .HasColumnType("integer");
+
                     b.Property<Guid?>("MotherId")
                         .HasColumnType("uuid");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
-
-                    b.Property<Guid?>("PersonId")
-                        .HasColumnType("uuid");
 
                     b.Property<Guid?>("SpouseId")
                         .HasColumnType("uuid");
@@ -96,27 +84,30 @@ namespace Infrastructure.Migrations
 
                     b.HasIndex("MotherId");
 
-                    b.HasIndex("PersonId");
-
-                    b.HasIndex("SpouseId");
+                    b.HasIndex("SpouseId")
+                        .IsUnique();
 
                     b.ToTable("People");
                 });
 
             modelBuilder.Entity("Domain.Employment", b =>
                 {
-                    b.HasOne("Domain.Company", "Company")
-                        .WithMany("employments")
-                        .HasForeignKey("Companyid");
-
                     b.HasOne("Domain.Person", "Person")
-                        .WithMany("Employments")
+                        .WithMany()
                         .HasForeignKey("PersonId");
+
+                    b.HasOne("Domain.Person", null)
+                        .WithMany("Employments")
+                        .HasForeignKey("PersonId1");
 
                     b.OwnsOne("Domain.EmploymentType", "EmploymentType", b1 =>
                         {
                             b1.Property<Guid>("EmploymentId")
                                 .HasColumnType("uuid");
+
+                            b1.Property<string>("Name")
+                                .IsRequired()
+                                .HasColumnType("text");
 
                             b1.HasKey("EmploymentId");
 
@@ -125,8 +116,6 @@ namespace Infrastructure.Migrations
                             b1.WithOwner()
                                 .HasForeignKey("EmploymentId");
                         });
-
-                    b.Navigation("Company");
 
                     b.Navigation("EmploymentType")
                         .IsRequired();
@@ -138,22 +127,15 @@ namespace Infrastructure.Migrations
                 {
                     b.HasOne("Domain.Person", "Father")
                         .WithMany()
-                        .HasForeignKey("FatherId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("FatherId");
 
                     b.HasOne("Domain.Person", "Mother")
                         .WithMany()
-                        .HasForeignKey("MotherId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("Domain.Person", null)
-                        .WithMany("Siblings")
-                        .HasForeignKey("PersonId");
+                        .HasForeignKey("MotherId");
 
                     b.HasOne("Domain.Person", "Spouse")
-                        .WithMany()
-                        .HasForeignKey("SpouseId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .WithOne()
+                        .HasForeignKey("Domain.Person", "SpouseId");
 
                     b.OwnsMany("Domain.Address", "Addresses", b1 =>
                         {
@@ -224,16 +206,9 @@ namespace Infrastructure.Migrations
                     b.Navigation("Spouse");
                 });
 
-            modelBuilder.Entity("Domain.Company", b =>
-                {
-                    b.Navigation("employments");
-                });
-
             modelBuilder.Entity("Domain.Person", b =>
                 {
                     b.Navigation("Employments");
-
-                    b.Navigation("Siblings");
                 });
 #pragma warning restore 612, 618
         }

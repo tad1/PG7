@@ -6,19 +6,19 @@ namespace Domain;
 
 public class EmploymentType : ValueObject
 {
-        public string name;
+        public string Name { get; init; }
         protected override IEnumerable<object> GetEqualityComponents()
         {
-                yield return name;
+                yield return Name;
         }
 }
 
 public class Employment
 {
-        public Guid Id { get; set; }
-        public EmploymentType EmploymentType { get; set; }
-        public double Salary { get; set; }
+        public Guid Id { get; init; }
+        public EmploymentType EmploymentType { get; init; }
+        public decimal Salary { get; init; }
         
-        public Company? Company { get; set; }
-        public Person? Person { get; set; }
+        public string? CompanyName { get; init; }
+        public Person Person { get; set; }
 }

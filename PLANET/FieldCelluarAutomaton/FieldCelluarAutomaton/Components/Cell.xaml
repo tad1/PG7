@@ -4,9 +4,79 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:FieldCelluarAutomaton.Components"
+             xmlns:models="clr-namespace:FieldCelluarAutomaton.Models"
+             xmlns:numerics="clr-namespace:System.Numerics;assembly=System.Runtime.Numerics"
              mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
+             d:DesignHeight="50" d:DesignWidth="50"
+             d:DataContext="{d:DesignInstance models:CellModel}"
+             >
+    <UserControl.Resources>
+        <SolidColorBrush x:Key="ForegroundBrush" Color="White"/>
+        <SolidColorBrush x:Key="SelectedBrush" Color="Red"/>
+        <DataTemplate x:Key="TemplateNumbers">
+            <TextBlock Width="50" Height="50" x:Name="CellValue" Foreground="{StaticResource ForegroundBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="16">
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}{0},{1}">
+                        <Binding Path="Value.Real"></Binding>
+                        <Binding Path="Value.Imaginary"></Binding>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </DataTemplate>
+        <DataTemplate x:Key="TemplateBoolean">
+            <Border Width="50" Height="50" x:Name="CellValue" HorizontalAlignment="Center" VerticalAlignment="Center" CornerRadius="20">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="{StaticResource ForegroundBrush}"></Setter>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Value.Magnitude}" Value="0">
+                                <Setter Property="Background" Value="Transparent"></Setter>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+            </Border>
+        </DataTemplate>
+        <DataTemplate x:Key="TemplateArrow">
+            <TextBlock Width="50" Height="50" Text="→" x:Name="CellValue" Foreground="{StaticResource ForegroundBrush}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="32">
+                <TextBlock.RenderTransform>
+                    <TransformGroup>
+                        <RotateTransform x:Name="RotateTransform" CenterX="12.5" CenterY="25" Angle="{Binding Angle}"/>
+                        <TranslateTransform X="12.5"></TranslateTransform>
+                    </TransformGroup>
+                </TextBlock.RenderTransform>
+            </TextBlock>
+        </DataTemplate>
         
-    </Grid>
+    </UserControl.Resources>
+    <Border BorderBrush="{StaticResource ForegroundBrush}" BorderThickness="1 1 1 1 ">
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Background" Value="Transparent"/>
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsSelected}" Value="True">
+                        <Setter Property="Background" Value="{StaticResource SelectedBrush}"/>
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+        <ContentControl Content="{Binding}">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Setter Property="ContentTemplate" Value="{StaticResource TemplateArrow}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DisplayType}" Value="Number">
+                            <Setter Property="ContentTemplate" Value="{StaticResource TemplateNumbers}"></Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DisplayType}" Value="Boolean">
+                            <Setter Property="ContentTemplate" Value="{StaticResource TemplateBoolean}"></Setter>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding RelativeSource={RelativeSource AncestorType=UserControl}, Path=DisplayType}" Value="Arrow">
+                            <Setter Property="ContentTemplate" Value="{StaticResource TemplateArrow}"></Setter>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
+    </Border>
 </UserControl>

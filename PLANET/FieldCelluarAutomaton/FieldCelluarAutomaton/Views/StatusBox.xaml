@@ -4,9 +4,34 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:FieldCelluarAutomaton.Views"
-             mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-        
-    </Grid>
+             xmlns:viewModels="clr-namespace:FieldCelluarAutomaton.ViewModels"
+             d:DataContext="{d:DesignInstance viewModels:StatusViewModel}"
+             Background="#131313"
+             Foreground="White"
+             mc:Ignorable="d">
+    <StatusBar Background="#131313" Foreground="White">
+        <StatusBarItem x:Name="SimulationMode">
+                <TextBlock>
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Setter Property="Text" Value="Paused"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                                    <Setter Property="Text" Value="Playing" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+        </StatusBarItem>
+        <StatusBarItem x:Name="Iteration">
+            <TextBlock>
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}tick {0}">
+                        <Binding Path="TickNumber"/>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </StatusBarItem>
+    </StatusBar>
 </UserControl>

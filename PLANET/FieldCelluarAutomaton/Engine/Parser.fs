@@ -1,6 +1,7 @@
 ﻿// based on https://www.youtube.com/watch?v=34C_7halqGw
 module ComplexMathLibrary.Parser
 
+    open System
     open System.Numerics
     open FParsec
 
@@ -20,6 +21,8 @@ module ComplexMathLibrary.Parser
         | LesserThanOrEquals
     
     type RuleIdent = string
+    let rng = System.Random()
+
     
     type Expr =
         // | Self of Complex
@@ -28,8 +31,10 @@ module ComplexMathLibrary.Parser
         | Get of Complex
         | Check of (RuleIdent * Complex)
         | Binary of (Expr * Expr * BinaryExprKind)
+        | Random of unit
+        | CurrentPosition of unit
 
-    let ruleIdent : Parser<RuleIdent, unit> = skipChar 'R' >>. many1Chars (letter <|> digit) |>> RuleIdent
+    let ruleIdent : Parser<RuleIdent, unit> = skipChar 'R' >>. many1Chars (letter <|> digit) |>> (fun s -> $"R{s}")
     let sign = (charReturn '+' 1.0 <|> charReturn '-' -1.0)
     
     let real = pfloat |>> fun v -> Complex(v,0)
@@ -42,7 +47,9 @@ module ComplexMathLibrary.Parser
     
 
     let comma = skipChar ',' .>> spaces
-
+    let prandom = skipChar 'r' .>> spaces |>> Random
+    let pcurrentPos = skipChar 'x' .>> spaces |>> CurrentPosition
+    
     let pfunc =
         between (pstring "p(") (pstring ")") complex .>> spaces |>> Get
     
@@ -82,6 +89,8 @@ module ComplexMathLibrary.Parser
     opp.TermParser <- choice [
         term
         complexIteral
+        prandom
+        pcurrentPos
         pfunc
         nfunc
         cfunc
@@ -113,19 +122,25 @@ module ComplexMathLibrary.Parser
         | Success(res, _, _) -> Result.Ok res
         | Failure(err, _, _) -> Result.Error err
     
-    let execute tokens =
+    let execute (ruleset:Map<string,FCA.RuleType>) tokens =
         let rec evaluate expr:(FCA.RuleType)=
             match expr with
             | ComplexLiteral i ->
                 fun _ -> i
+            | Random _ ->
+                fun _ ->
+                    let theta = rng.NextDouble() * 2.0 * Math.PI
+                    Complex(Math.Cos(theta), Math.Sin(theta))
+            | CurrentPosition _ ->
+                fun (_,pos) -> pos
             | Neighbour s ->
-                match FCA.Ruleset.TryFind s with
+                match ruleset.TryFind s with
                 | None -> failwith "invalid rule"
                 | Some value -> FCA.n value
             | Get complex ->
                 FCA.p complex
             | Check (rule, offset) ->
-                match FCA.Ruleset.TryFind rule with
+                match ruleset.TryFind rule with
                 | None -> failwith "invalid rule"
                 | Some rule -> FCA.c (rule,offset)
             | Binary (left, right, kind) ->

@@ -4,9 +4,39 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:FieldCelluarAutomaton.Views"
-             mc:Ignorable="d"
-             d:DesignHeight="300" d:DesignWidth="300">
-    <Grid>
-        
-    </Grid>
+             xmlns:viewModels="clr-namespace:FieldCelluarAutomaton.ViewModels"
+             xmlns:components="clr-namespace:FieldCelluarAutomaton.Components"
+             d:DataContext="{d:DesignInstance viewModels:GridViewModel}"
+             mc:Ignorable="d">
+    <ItemsControl ItemsSource="{Binding GameGrid}">
+        <ItemsControl.Style>
+            <Style TargetType="ItemsControl">
+                <Setter Property="BorderBrush" Value="#151515" />
+                <Setter Property="BorderThickness" Value="5" />
+                <Style.Triggers>
+                    <DataTrigger Binding="{Binding IsPlaying}" Value="True">
+                        <Setter Property="BorderBrush" Value="#651515" />
+                    </DataTrigger>
+                </Style.Triggers>
+            </Style>
+        </ItemsControl.Style>
+        <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+                <UniformGrid Rows="{Binding GridHeight}" Columns="{Binding GridWidth}">
+                        <UniformGrid.RenderTransform>
+                            <TransformGroup>
+                                <ScaleTransform ScaleX="{Binding Zoom}" ScaleY="{Binding Zoom}" />
+                                <TranslateTransform X="{Binding OffsetX}" Y="{Binding OffsetY}" />
+                            </TransformGroup>
+                        </UniformGrid.RenderTransform>
+                    </UniformGrid>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <components:Cell DataContext="{Binding }" MaxHeight="50" MaxWidth="50" DisplayType="{Binding RelativeSource={RelativeSource AncestorType=ItemsControl}, Path=DataContext.CellDisplay}" MouseLeftButtonDown="UIElement_OnMouseLeftButtonDown"/>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+    </ItemsControl>
+
 </UserControl>

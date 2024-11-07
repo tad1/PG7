@@ -1,0 +1,117 @@
+﻿<Window x:Class="FieldCelluarAutomaton.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:FieldCelluarAutomaton"
+        xmlns:views="clr-namespace:FieldCelluarAutomaton.Views"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800" Style="{DynamicResource windowStyle}"
+        Background="#131313"
+        Foreground="White"
+        >
+    
+    <Window.InputBindings>
+        <KeyBinding Key="Enter" Modifiers="Control" Command="NextPage"/>
+        <KeyBinding Key="Enter" Modifiers="Shift" Command="Play"/>
+        <KeyBinding Key="OemPlus" Modifiers="Control" Command="IncreaseZoom"/>
+        <KeyBinding Key="OemMinus" Modifiers="Control" Command="DecreaseZoom"/>
+        <KeyBinding Key="OemQuestion" Modifiers="Control" Command="Find" />
+    </Window.InputBindings>
+    <Window.CommandBindings>
+        <CommandBinding Command="NextPage"
+                        Executed="Step_Execute"
+                        CanExecute="Step_CanExecute"
+                        />
+        <CommandBinding Command="IncreaseZoom"
+                        Executed="IncreaseZoom"></CommandBinding>
+        <CommandBinding Command="DecreaseZoom" Executed="DecreaseZoom"></CommandBinding>
+        <CommandBinding Command="Find" Executed="FocusCommand" />
+        <CommandBinding Command="Save"
+                        Executed="OnSave"/>
+        <CommandBinding Command="Open"
+                        Executed="OnLoad"
+                        />
+        <CommandBinding Command="New"
+                        Executed="NewCommand"
+            />
+    </Window.CommandBindings>
+    <Window.Resources>
+        <Storyboard x:Key="JumpAnimationStoryboard">
+            <!-- Step 1: Move up by 50px relative to its current position -->
+            <DoubleAnimationUsingKeyFrames Storyboard.TargetProperty="Top">
+                <LinearDoubleKeyFrame KeyTime="0:0:0.1" Value="-50" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.2" Value="-80" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.3" Value="-60" />
+                <LinearDoubleKeyFrame KeyTime="0:0:0.4" Value="0" />
+            </DoubleAnimationUsingKeyFrames>
+        </Storyboard>
+        <Style TargetType="Menu">
+            <Setter Property="Background" Value="#0A0A0A"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#131313"/>
+        </Style>
+        <Style TargetType="MenuItem">
+            <Setter Property="Background" Value="#131313"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderBrush" Value="#333333"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+
+            <!-- Change background on hover -->
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="#333333"/>
+                </Trigger>
+                <Trigger Property="IsSubmenuOpen" Value="True">
+                    <Setter Property="Background" Value="#333333"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+
+    </Window.Resources>
+    <Window.RenderTransform>
+        <TranslateTransform x:Name="WindowTranslateTransform"></TranslateTransform>
+    </Window.RenderTransform>
+    <DockPanel LastChildFill="True">
+        <!--UP - menu -->
+        <Menu DockPanel.Dock="Top">
+            <MenuItem Header="_File">
+                <MenuItem Command="New" Header="_New..."/>
+                <MenuItem Command="Open" Header="_Open"/>
+                <MenuItem Command="Save" Header="_Save"/>
+                <MenuItem Command="SaveAs" Header="_SaveAs"/>
+            </MenuItem>
+            <MenuItem Header="_Simulation">
+                <MenuItem Command="NextPage" Header="_Step"/>
+                <MenuItem Command="Play" Header="_Play"/>
+            </MenuItem>
+            <MenuItem Header="_Display">
+                <MenuItem x:Name="DisplayNumbersCheck" IsCheckable="True" Header="Numbers" Click="DisplayNumbersCheck_OnClick"/>
+                <MenuItem x:Name="DisplayArrowsCheck" IsCheckable="True" Header="Arrows" Click="DisplayArrowsCheck_OnClick"/>
+                <MenuItem x:Name="DisplayBooleanCheck" IsCheckable="True" Header="Boolean" Click="DisplayBooleanCheck_OnClick"/>
+            </MenuItem>
+        </Menu>
+        <DockPanel DockPanel.Dock="Right" Width="200">
+            <StackPanel DockPanel.Dock="Top" VerticalAlignment="Top">
+                <views:SlidersView x:Name="SlidersView"/>
+                <views:CellInfoView x:Name="CellInfoView" />
+                <TextBlock Text="Ruleset" Foreground="White" FontSize="16" FontWeight="Heavy"></TextBlock>
+                <views:RulesView x:Name="RulesView" />
+                <TextBlock Text="Saves" Foreground="White" FontSize="16" FontWeight="Heavy"></TextBlock>
+                <views:SavesView x:Name="SavesView" />
+
+            </StackPanel>
+            <views:StatusBox x:Name="StatusView" DockPanel.Dock="Bottom" Height="30" BorderBrush="White" BorderThickness="1 1 0 0" VerticalAlignment="Bottom"/>
+        </DockPanel>
+
+        <Border BorderThickness="1" DockPanel.Dock="Bottom">
+            <TextBox x:Name="CommandInterface" Background="#131313" Foreground="White" FontSize="16" Height="30" KeyDown="TextBox_KeyDown" KeyUp="CommandInterface_OnKeyUp"></TextBox>
+        </Border>
+        <Viewbox x:Name="ZoomViewBox" ClipToBounds="True" Focusable="True" MouseDown="MainWindow_OnMouseDown">
+            <views:GridView x:Name="GridView" KeyDown="OnKeyDown" />
+        </Viewbox>
+
+    </DockPanel>
+</Window>

@@ -2,5 +2,7 @@
 
 public enum CellDisplay
 {
-    
+    Number,
+    Boolean,
+    Arrow
 }

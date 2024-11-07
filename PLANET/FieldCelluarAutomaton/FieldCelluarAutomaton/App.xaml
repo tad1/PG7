@@ -1,0 +1,10 @@
+﻿<Application x:Class="FieldCelluarAutomaton.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:FieldCelluarAutomaton"
+             xmlns:wpf="clr-namespace:Dark.Net.Wpf;assembly=DarkNet"
+             StartupUri="MainWindow.xaml">
+    <Application.Resources>
+        <wpf:SkinManager x:Key="skinManager"/>
+    </Application.Resources>
+</Application>

@@ -2,9 +2,9 @@
 
 namespace FieldCelluarAutomaton.Views;
 
-public partial class CellInfoView : UserControl
+public partial class SlidersView : UserControl
 {
-    public CellInfoView()
+    public SlidersView()
     {
         InitializeComponent();
     }

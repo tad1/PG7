@@ -1,0 +1,19 @@
+﻿<UserControl x:Class="FieldCelluarAutomaton.Views.SlidersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:FieldCelluarAutomaton.Views"
+             xmlns:viewModels="clr-namespace:FieldCelluarAutomaton.ViewModels"
+             d:DataContext="{d:DesignInstance viewModels:SlidersViewModel}"
+             mc:Ignorable="d">
+    <StackPanel>
+        <TextBlock Text="simulation speed" HorizontalAlignment="Center"></TextBlock>
+        <Slider x:Name="SimulatorSpeedSlider" Minimum="0.5" Maximum="20" Value="{Binding Speed}" TickFrequency="0.5"  TickPlacement="BottomRight" HorizontalAlignment="Stretch"></Slider>
+        <Label Content="{Binding ElementName=SimulatorSpeedSlider, Path=Value, UpdateSourceTrigger=PropertyChanged}" 
+               VerticalAlignment="Bottom" HorizontalAlignment="Center" ContentStringFormat="{}{0:0.0} ticks per second"
+               Foreground="White"/>
+        <TextBlock Text="zoom" HorizontalAlignment="Center"></TextBlock>
+        <Slider x:Name="ZoomSlider" Minimum="0.5" Maximum="3" Value="{Binding Zoom}" TickFrequency="0.1" TickPlacement="BottomRight" HorizontalAlignment="Stretch"></Slider>
+    </StackPanel>
+</UserControl>

@@ -5,6 +5,7 @@ using System.Net;
 using System.Numerics;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Animation;
@@ -20,6 +21,7 @@ using FieldCelluarAutomaton.Views;
 using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using JsonSerializer = System.Text.Json.JsonSerializer;
+using KeyEventArgs = System.Windows.Input.KeyEventArgs;
 
 
 namespace FieldCelluarAutomaton;
@@ -35,12 +37,16 @@ public partial class MainWindow : Window, ILoad
     IConfiguration Configuration { get; set; }
     (CellDisplay type, MenuItem item)[] DisplayMenuItems;
     private string saveDir;
-    
+    private string SaveDirFullPath => $@"{Directory.GetCurrentDirectory()}\{saveDir}";
+    private string DefaultSavePath => $@"{Directory.GetCurrentDirectory()}\{saveDir}\quicksave.json";
+
     //state
     private string selectedRule = string.Empty;
     private int historyElement = 0;
     private string currentCommand = "";
     private ulong TickNumber = 0;
+    
+    private bool isPlaying = false;
     private (int width, int height) GridSize { get; set; } = (10, 10);
     private List<string> commandHistory = new();
     private ZoomModel zoom = new ZoomModel()
@@ -118,7 +124,7 @@ public partial class MainWindow : Window, ILoad
         });
     }
 
-    public void Save(string saveName = "quicksave")
+    public void Save(string filePath)
     {
         var saveData = new SaveData()
         {
@@ -126,19 +132,17 @@ public partial class MainWindow : Window, ILoad
             rules = Public.rulesetInfo.Select(pair => (pair.Value.RuleId, pair.Value.RuleStr)).ToArray(),
             state = _bus.State.Select(pair => (pair.Key.Item1.AssemblyQualifiedName, pair.Key.Item2, JsonConvert.SerializeObject(pair.Value))).ToArray()!,
         };
-        var filePath = $"{saveDir}/{saveName}.json";
         var jsonString = JsonConvert.SerializeObject(saveData, Formatting.Indented);
-        if (!Directory.Exists(saveDir))
+        if (!Directory.Exists(SaveDirFullPath))
         {
-            Directory.CreateDirectory(saveDir);
+            Directory.CreateDirectory(SaveDirFullPath);
         }
         File.WriteAllText(filePath, jsonString);
     }
 
-    public void Load(string saveName = "quicksave")
+    public void Load(string filePath)
     {
         var obj = System.Configuration.ConfigurationManager.AppSettings;
-        var filePath = $"{saveDir}/{saveName}.json";
         var jsonString = File.ReadAllText(filePath);
         var saveData = JsonConvert.DeserializeObject<SaveData>(jsonString);
         engineBridge.Load(saveData.grid);
@@ -164,7 +168,7 @@ public partial class MainWindow : Window, ILoad
             var args = input.Split(' ');
             switch (input.Split(' ')[0])
             {
-                case "step" or "st":
+                case "step" or "s":
                     engineBridge.Advance();
                     break;
                 case "cell" or "c":
@@ -173,7 +177,7 @@ public partial class MainWindow : Window, ILoad
                         _bus.Publish<Complex>("selectedCell", new Complex(int.Parse(args[1]), int.Parse(args[2])));
                     }
                     break;
-                case "select" or "se":
+                case "rule" or "r":
                     if (args.Length >= 2)
                     {
                         _bus.Publish<string>("selectedRule",args[1]);
@@ -221,30 +225,28 @@ public partial class MainWindow : Window, ILoad
                 case "save":
                     if (args.Length >= 2)
                     {
-                        Save(args[1]);
+                        Save(ShortNameToPath(args[1]));
                     }
                     else
                     {
-                        Save();
+                        Save(DefaultSavePath);
                     }
                     break;
                 case "load":
                     if (args.Length >= 2)
                     {
-                        Load(args[1]);
+                        Load(ShortNameToPath(args[1]));
                     }
                     else
                     {
-                        Load();
+                        Load(DefaultSavePath);
                     }
                     break;
                 case "play" or "start" or "p":
-                    timer.Start();
-                    _bus.Publish<bool>("isPlaying", true);
+                    Play();
                     break;
                 case "stop" or "stp":
-                    timer.Stop();
-                    _bus.Publish<bool>("isPlaying", false);
+                    Stop();
                     break;
                 case "exit":
                     this.Close();
@@ -269,6 +271,33 @@ public partial class MainWindow : Window, ILoad
         
     }
 
+    private string ShortNameToPath(string shortName)
+    {
+        return $@"{SaveDirFullPath}\{shortName}.json";
+    }
+    
+    private void ToggleStart()
+    {
+        if(isPlaying) Stop();
+        else Play();
+    }
+    
+    private void Play()
+    {
+        timer.Start();
+        isPlaying = true;
+        StopPlayMenuItem.Header = "_Stop";
+        _bus.Publish<bool>("isPlaying", true);
+    }
+    
+    private void Stop()
+    {
+        timer.Stop();
+        isPlaying = false;
+        StopPlayMenuItem.Header = "_Start";
+        _bus.Publish<bool>("isPlaying", false);
+    }
+
     private void saveToHistory(string command)
     {
         commandHistory.Insert(0, command);
@@ -278,7 +307,7 @@ public partial class MainWindow : Window, ILoad
 
     private void Step_CanExecute(object sender, CanExecuteRoutedEventArgs e)
     {
-        e.CanExecute = true;
+        e.CanExecute = selectedRule != string.Empty;
     }
     private void Step_Execute(object sender, ExecutedRoutedEventArgs executedRoutedEventArgs)
     {
@@ -358,12 +387,21 @@ public partial class MainWindow : Window, ILoad
 
     private void OnSave(object sender, ExecutedRoutedEventArgs e)
     {
-        this.Save();
+        this.Save(DefaultSavePath);
     }
 
     private void OnLoad(object sender, ExecutedRoutedEventArgs e)
     {
-        this.Load();
+        var dialog = new OpenFileDialog();
+        dialog.DefaultExt = ".json";
+        dialog.Filter = "save file (*.json)|*.json";
+        dialog.InitialDirectory = SaveDirFullPath;
+        dialog.RestoreDirectory = true;
+        var res = dialog.ShowDialog();
+        if (res == System.Windows.Forms.DialogResult.OK)
+        {
+            Load(dialog.FileName);
+        }
     }
 
 
@@ -383,6 +421,7 @@ public partial class MainWindow : Window, ILoad
 
     private void NewerCommandFromHistory()
     {
+        if(commandHistory.Count == 0) return;
         historyElement--;
         if (historyElement <= 0)
         {
@@ -397,6 +436,7 @@ public partial class MainWindow : Window, ILoad
 
     private void OlderCommandFromHistory()
     {
+        if(commandHistory.Count == 0) return;
         if (historyElement == 0) currentCommand = CommandInterface.Text;
         historyElement++;
         if(historyElement >= commandHistory.Count) historyElement = commandHistory.Count;
@@ -439,5 +479,24 @@ public partial class MainWindow : Window, ILoad
         dialog.ShowDialog();
         var size = (int.Parse(dialog.Width.Text), int.Parse(dialog.Height.Text));
         engineBridge.New(size.Item1, size.Item2);
+    }
+
+    private void PlayExecute(object sender, ExecutedRoutedEventArgs e)
+    {
+        ToggleStart();
+    }
+
+    private void SaveAs(object sender, ExecutedRoutedEventArgs e)
+    {
+        var dialog = new SaveFileDialog();
+        dialog.DefaultExt = ".json";
+        dialog.Filter = "save file (*.json)|*.json";
+        dialog.InitialDirectory = SaveDirFullPath;
+        dialog.RestoreDirectory = true;
+        var res = dialog.ShowDialog();
+        if (res == System.Windows.Forms.DialogResult.OK)
+        {
+            Save(dialog.FileName);
+        }
     }
 }

@@ -23,12 +23,18 @@
                         Executed="Step_Execute"
                         CanExecute="Step_CanExecute"
                         />
+        <CommandBinding Command="Play"
+                        Executed="PlayExecute"
+                        CanExecute="Step_CanExecute"
+        />
         <CommandBinding Command="IncreaseZoom"
                         Executed="IncreaseZoom"></CommandBinding>
         <CommandBinding Command="DecreaseZoom" Executed="DecreaseZoom"></CommandBinding>
         <CommandBinding Command="Find" Executed="FocusCommand" />
         <CommandBinding Command="Save"
                         Executed="OnSave"/>
+        <CommandBinding Command="SaveAs"
+                        Executed="SaveAs"/>
         <CommandBinding Command="Open"
                         Executed="OnLoad"
                         />
@@ -84,8 +90,8 @@
                 <MenuItem Command="SaveAs" Header="_SaveAs"/>
             </MenuItem>
             <MenuItem Header="_Simulation">
-                <MenuItem Command="NextPage" Header="_Step"/>
-                <MenuItem Command="Play" Header="_Play"/>
+                <MenuItem Command="NextPage" Header="_Step" InputGestureText="Ctr+Enter"/>
+                <MenuItem x:Name="StopPlayMenuItem" Command="Play" Header="_Play" InputGestureText="Shift+Enter"/>
             </MenuItem>
             <MenuItem Header="_Display">
                 <MenuItem x:Name="DisplayNumbersCheck" IsCheckable="True" Header="Numbers" Click="DisplayNumbersCheck_OnClick"/>

@@ -1,0 +1,121 @@
+Use the textbox under the grid to write rules and execute commands.
+Check EXAMPLES.txt
+
+
+==== RULES ====
+
+syntax:
+	R<name>: <expression>
+example:
+	R1: r
+	R_random: r
+
+name syntax: 
+	regex: [\p{L}0-9_]+
+	any sequence with UTF letters,digits,underscore
+
+	example names:
+	//	R1A , RA1_ R_A, Rあ Raaaa
+	invalid:
+		R! , R
+
+expressions:
+	each <EXPRESSION> evaluates to complex number
+		logic values are complex numbers as well
+	expressions evaluate left-to-right
+		2 + 2 * 2 -> 8
+		2 + (2 * 2) -> 6
+	
+	An <EXPRESSION> is any of following:
+		<COMPLEX>
+		<FUNCTION>
+		<LOGICAL_VALUE>
+		<BINARY_OPERATION>
+		(<EXPRESSION>)
+
+	<COMPLEX> - a complex number literal
+		syntax:
+			<REAL>+<IMAGINARY>i
+			<REAL>+<IMAGINARY>i
+			<REAL>
+			<IMAGINARY>i
+		example:
+			1+4i
+			-0.4-1.3i
+			5
+			1i
+		note:
+			i - is invalid
+
+
+	<FUNCTION>:
+		r - random unit complex number
+		x - cell position
+		p(<EXPRESSION>) - relative cell value
+			p(-1) - returns value of left on the left - relative offset (-1, 0)
+		c(<RULE>, <EXPRESSION>) - returns logical value, 1+1i when rule
+		n(<RULE>) - returns how many neighbour cells (3x3 grid) satisfy logic rule
+			i.e. n(R1,4) neighbour cells satisfy R1 -> returns 4+4i
+
+	<LOGICAL_VALUE>
+		true
+			represent 1+1i
+		false
+			represent 0+0i
+		any non-false value is logical true
+
+	<BINARY_OPERATION>
+
+		-- MATH ---
+		<EXPRESSION> + <EXPRESSION>
+			note spacing:
+				2+3i - is <COMPLEX>
+				2 + 3i - is expression <COMPLEX> + <COMPLEX>, which evaluates to <COMPLEX>
+		<EXPRESSION> - <EXPRESSION>
+		<EXPRESSION> * <EXPRESSION> - complex multiplication
+		<EXPRESSION> / <EXPRESSION> - complex division
+
+		-- BINARY ---
+		operate on logical values
+			<EXPRESSION> and <EXPRESSION>
+			<EXPRESSION> or <EXPRESSION>
+			<EXPRESSION> xor <EXPRESSION>
+
+		-- EQUALITY ---
+			<EXPRESSION> = <EXPRESSION>
+			<EXPRESSION> != <EXPRESSION>
+
+		-- RELATIONAL ---
+		operate on real part 
+			<EXPRESSION> > <EXPRESSION>
+			<EXPRESSION> >= <EXPRESSION>
+			<EXPRESSION> < <EXPRESSION>
+			<EXPRESSION> =< <EXPRESSION>
+
+
+==== COMMAND ====
+
+-- game flow ---
+s[tep] - advance on selected rule
+r[ule] R<x> - select rule
+a[pply] R<x> - apply rule
+p[lay]/start - run simulation
+stop/stp - stop simulation
+
+
+new - clear game
+new <X> - square grid
+	new 10 - 10x10 grid
+new <X> <Y> - new X,Y rectangle grid
+	new 10 5 10x5 grid
+c[ell] X Y - select cell
+
+disp[lay] <n[umber]/b[oolean]/a[rrow]>
+
+save [name] - save to save directory (default quicksave)
+load [name] - load from directory
+
+jump - encourage app to jump
+exit - exit app
+
+

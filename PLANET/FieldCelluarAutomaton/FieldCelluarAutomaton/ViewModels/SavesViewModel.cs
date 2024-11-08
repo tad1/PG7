@@ -6,7 +6,7 @@ namespace FieldCelluarAutomaton.ViewModels;
 
 public partial class SavesViewModel : ObservableObject
 {
-    [ObservableProperty] private string[] saves = new string[]{};
+    [ObservableProperty] private SaveItem[] saves = new SaveItem[]{};
     private ILoad _model;
 
     FileSystemWatcher watcher;
@@ -32,7 +32,11 @@ public partial class SavesViewModel : ObservableObject
 
     private void UpdateFiles()
     {
-        Saves = Directory.GetFiles(watcher.Path).Select(s => Path.GetFileNameWithoutExtension(s)).ToArray();
+        Saves = Directory.GetFiles(watcher.Path).Select(s => new SaveItem()
+        {
+            ShortName = Path.GetFileNameWithoutExtension(s),
+            FullPath = s
+        }).ToArray();
     }
     private void WatcherOnCreated(object sender, FileSystemEventArgs e)
     {

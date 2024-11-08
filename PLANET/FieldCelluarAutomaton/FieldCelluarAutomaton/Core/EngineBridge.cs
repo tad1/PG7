@@ -31,12 +31,14 @@ public class EngineBridge
     
     public void ApplyRule(string rule)
     {
+        if(!Public.ruleset.ContainsKey(rule)) return;
         ComplexMathLibrary.Public.apply(ComplexMathLibrary.Public.ruleset[rule]);
         _bus.Publish<Event>("grid_updated", new Event());
     }
 
     public void Advance()
     {
+        if(!Public.ruleset.ContainsKey(_selectedRule)) return;
         ApplyRule(_selectedRule);
         _bus.Publish<ulong>("tickNumber", ++_tickNumber);
     }

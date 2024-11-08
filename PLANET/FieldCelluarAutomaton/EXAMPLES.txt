@@ -1,0 +1,22 @@
+
+=== GAME OF LIFE ===
+
+R_alive: p(0) > 0
+R_life: ((p(0) = 0) and (n(R_alive) = 3+3i)) or ((p(0) > 0) and (n(R_alive) = 2+2i)) or ((p(0) > 0) and (n(R_alive) = 3+3i))
+
+
+
+R_diffuse: (p(0) * 0.5) + (p(-1) * 0.125) + (p(1) * 0.125) + (p(-1i) * 0.125) + (p(1i) * 0.125)
+R_growth_decay: (p(0) * 0.9) + (n(R_alive) * 0.1)
+R_pulse: (p(0) * 0.7) + (p(1) * 0.15) + (p(-1) * 0.15)
+R_radial_decay: p(0) / (1 + (x * 0.1))
+
+R_electric: (p(0) * 0.7) + (p(-1) + p(1) + p(-1i) + p(1i)) * 0.05 * (x / 10)
+R_electric: (p(0) * 0.7) + (p(-1) + p(1) + p(-1i) + p(1i)) * 0.05 * (true / 10)
+
+R_magnetic: (p(0) * 0.95) + (p(-1) * (x * 0.1i)) - (p(1) * (x * 0.1i))
+R_gravity: p(0) + (1 / (x + 1))
+R_radial_field: (p(0) * 0.8) + (p(-1) + p(1) + p(-1i) + p(1i)) * 0.1 * (1 / (x + 1))
+
+
+

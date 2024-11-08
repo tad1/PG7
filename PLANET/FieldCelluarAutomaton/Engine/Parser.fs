@@ -26,15 +26,17 @@ module ComplexMathLibrary.Parser
     
     type Expr =
         // | Self of Complex
+        | True of unit
+        | False of unit
         | ComplexLiteral of Complex
         | Neighbour of RuleIdent
-        | Get of Complex
-        | Check of (RuleIdent * Complex)
+        | Get of Expr
+        | Check of (RuleIdent * Expr)
         | Binary of (Expr * Expr * BinaryExprKind)
         | Random of unit
         | CurrentPosition of unit
 
-    let ruleIdent : Parser<RuleIdent, unit> = skipChar 'R' >>. many1Chars (letter <|> digit) |>> (fun s -> $"R{s}")
+    let ruleIdent : Parser<RuleIdent, unit> = skipChar 'R' >>. many1Chars (letter <|> digit <|> pchar '_') |>> (fun s -> $"R{s}")
     let sign = (charReturn '+' 1.0 <|> charReturn '-' -1.0)
     
     let real = pfloat |>> fun v -> Complex(v,0)
@@ -49,15 +51,6 @@ module ComplexMathLibrary.Parser
     let comma = skipChar ',' .>> spaces
     let prandom = skipChar 'r' .>> spaces |>> Random
     let pcurrentPos = skipChar 'x' .>> spaces |>> CurrentPosition
-    
-    let pfunc =
-        between (pstring "p(") (pstring ")") complex .>> spaces |>> Get
-    
-    let nfunc =
-        between (pstring "n(") (pstring ")") ruleIdent .>> spaces |>> Neighbour
-        
-    let cfunc =
-        between (pstring "c(") (pstring ")") ( ruleIdent .>> comma .>>. complex) .>> spaces |>> Check
     
     let parenthesesExpr p =
         between (pstring "(") (pstring ")") p
@@ -84,6 +77,23 @@ module ComplexMathLibrary.Parser
     //
     let opp = OperatorPrecedenceParser<Expr, _, _>()
     let expr = opp.ExpressionParser
+    
+    
+    let pfunc =
+        between (pstring "p(") (pstring ")") expr .>> spaces |>> Get
+    
+    let nfunc =
+        between (pstring "n(") (pstring ")") ruleIdent .>> spaces |>> Neighbour
+        
+    let cfunc =
+        between (pstring "c(") (pstring ")") ( ruleIdent .>> comma .>>. expr) .>> spaces |>> Check
+    
+    let trueFunc =
+        skipString "true" .>> spaces |>> True        
+    
+    let falseFunc =
+        skipString "false" .>> spaces |>> False    
+    
     let term = parenthesesExpr expr .>> spaces
 
     opp.TermParser <- choice [
@@ -94,6 +104,8 @@ module ComplexMathLibrary.Parser
         pfunc
         nfunc
         cfunc
+        falseFunc
+        trueFunc
     ]
     
     opp.AddOperator <| InfixOperator("*", spaces, 1, Associativity.Left, fun x y -> Expr.Binary (x, y, BinaryExprKind.Multiply))
@@ -137,12 +149,15 @@ module ComplexMathLibrary.Parser
                 match ruleset.TryFind s with
                 | None -> failwith "invalid rule"
                 | Some value -> FCA.n value
-            | Get complex ->
-                FCA.p complex
-            | Check (rule, offset) ->
+            | Get exp ->
+                let evaluated = (evaluate exp)
+                fun v -> FCA.p (evaluated v) v 
+            | Check (rule, exp) ->
                 match ruleset.TryFind rule with
                 | None -> failwith "invalid rule"
-                | Some rule -> FCA.c (rule,offset)
+                | Some rule ->
+                    let evaluated = (evaluate exp)
+                    fun v -> FCA.c (rule,(evaluated v)) v
             | Binary (left, right, kind) ->
                 let leftEvaluated = (evaluate left)
                 let rightEvaluated = (evaluate right)
@@ -161,6 +176,10 @@ module ComplexMathLibrary.Parser
                 | GreaterThanOrEquals -> (fun v -> if (leftEvaluated v).Real >= (rightEvaluated v).Real then FCA.ComplexTrue else FCA.ComplexFalse)
                 | LesserThan -> (fun v -> if (leftEvaluated v).Real < (rightEvaluated v).Real then FCA.ComplexTrue else FCA.ComplexFalse)
                 | LesserThanOrEquals -> (fun v -> if (leftEvaluated v).Real <= (rightEvaluated v).Real then FCA.ComplexTrue else FCA.ComplexFalse)
+            | True unit ->
+                fun _ -> FCA.ComplexTrue
+            | False unit ->
+                fun _ -> FCA.ComplexFalse
         
         evaluate tokens
     //     

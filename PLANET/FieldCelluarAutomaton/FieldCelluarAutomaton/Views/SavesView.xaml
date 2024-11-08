@@ -11,8 +11,8 @@
     <ListBox x:Name="SavesList" ItemsSource="{Binding Saves}" Background="#131313" Foreground="White">
         <ListBox.ItemTemplate>
             <DataTemplate>
-                <UserControl MouseDoubleClick="Control_OnMouseDoubleClick" Tag="{Binding }">
-                    <TextBlock Foreground="White" Text="{Binding }"/>
+                <UserControl MouseDoubleClick="Control_OnMouseDoubleClick" Tag="{Binding FullPath}">
+                    <TextBlock Foreground="White" Text="{Binding ShortName}"/>
                 </UserControl>
             </DataTemplate>
         </ListBox.ItemTemplate>

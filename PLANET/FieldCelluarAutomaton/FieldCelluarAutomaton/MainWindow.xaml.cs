@@ -42,6 +42,7 @@ public partial class MainWindow : Window, ILoad
 
     //state
     private string selectedRule = string.Empty;
+    private Public.GridType selectedBoardType = Public.GridType.Checked;
     private int historyElement = 0;
     private string currentCommand = "";
     private ulong TickNumber = 0;
@@ -106,7 +107,10 @@ public partial class MainWindow : Window, ILoad
         SkinManager skinManager = (SkinManager)FindResource("skinManager");
         skinManager.RegisterSkins(new Uri("Skins/Skin.Light.xaml", UriKind.Relative), new Uri("Skins/Skin.Dark.xaml", UriKind.Relative));
         
+        _bus.RegisterSubscriptions(this);
         _bus.Publish<(int, int)>("gridSize", (10,10));
+        _bus.Publish<Public.GridType>("board_type", Public.GridType.Checked);
+
         _bus.Subscribe<string>("selectedRule", s => selectedRule = s);
         _bus.Subscribe<ZoomModel>("zoom", s => zoom = s);
         _bus.Subscribe<float>("tickSpeedMs", s => timer.Interval = TimeSpan.FromMilliseconds(s));
@@ -124,6 +128,12 @@ public partial class MainWindow : Window, ILoad
         });
     }
 
+    [Subscribe("board_type")]
+    private void UpdateBoardType(Public.GridType gridType)
+    {
+        selectedBoardType = gridType;
+    }
+    
     public void Save(string filePath)
     {
         var saveData = new SaveData()
@@ -205,6 +215,7 @@ public partial class MainWindow : Window, ILoad
                     storyboard.Begin();
                     break;
                 case "display" or "disp":
+                    if(args.Length == 0) break;
                     switch (args[1])
                     {
                         case "number" or "n":
@@ -215,6 +226,18 @@ public partial class MainWindow : Window, ILoad
                             break;
                         case "arrow" or "a":
                             _bus.Publish<CellDisplay>("cellDisplay", CellDisplay.Arrow);
+                            break;
+                    }
+                    break;
+                case "type" or "t":
+                    if(args.Length == 0) break;
+                    switch (args[1])
+                    {
+                        case "checked" or "chk" or "c":
+                            _bus.Publish<Public.GridType>("board_type", Public.GridType.Checked);
+                            break;
+                        case "wrapped" or "wrp" or "w":
+                            _bus.Publish<Public.GridType>("board_type", Public.GridType.Wrapped);
                             break;
                     }
                     break;
@@ -247,6 +270,10 @@ public partial class MainWindow : Window, ILoad
                     break;
                 case "stop" or "stp":
                     Stop();
+                    break;
+                case "clear" or "clr" or "cls":
+                    engineBridge.ClearRules();
+                    engineBridge.New(GridSize.width, GridSize.height);
                     break;
                 case "exit":
                     this.Close();
@@ -465,6 +492,11 @@ public partial class MainWindow : Window, ILoad
 
     private void NewCommand(object sender, ExecutedRoutedEventArgs e)
     {
+        Public.GridType[] gridTypes = new [] //NOTE: coupling with dialog window
+        {
+            Public.GridType.Checked,
+            Public.GridType.Wrapped,
+        };
         var dialog = new NewGridDialog
         {
             Width =
@@ -474,10 +506,16 @@ public partial class MainWindow : Window, ILoad
             Height =
             {
                 Text = (GridSize.height).ToString()
+            },
+            GridType =
+            {
+                SelectedIndex = selectedBoardType.Equals(Public.GridType.Checked) ? 0 : 1,
             }
         };
         dialog.ShowDialog();
         var size = (int.Parse(dialog.Width.Text), int.Parse(dialog.Height.Text));
+        var type = gridTypes[dialog.GridType.SelectedIndex];
+        _bus.Publish<Public.GridType>("board_type", type);
         engineBridge.New(size.Item1, size.Item2);
     }
 

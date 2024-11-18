@@ -33,5 +33,16 @@
                 </TextBlock.Text>
             </TextBlock>
         </StatusBarItem>
+        <StatusBarItem x:Name="BoardInfo">
+            <TextBlock>
+                <TextBlock.Text>
+                    <MultiBinding StringFormat="{}{0}x{1} {2} board">
+                        <Binding Path="GridSize.Real"/>
+                        <Binding Path="GridSize.Imaginary"/>
+                        <Binding Path="BoardType"/>
+                    </MultiBinding>
+                </TextBlock.Text>
+            </TextBlock>
+        </StatusBarItem>
     </StatusBar>
 </UserControl>

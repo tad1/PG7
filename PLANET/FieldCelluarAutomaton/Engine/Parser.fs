@@ -30,7 +30,10 @@ module ComplexMathLibrary.Parser
         | False of unit
         | ComplexLiteral of Complex
         | Neighbour of RuleIdent
+        | If of (Expr * Expr * Expr)
         | Get of Expr
+        | Magnitude of Expr
+        | Unit of Expr
         | Check of (RuleIdent * Expr)
         | Binary of (Expr * Expr * BinaryExprKind)
         | Random of unit
@@ -81,12 +84,23 @@ module ComplexMathLibrary.Parser
     
     let pfunc =
         between (pstring "p(") (pstring ")") expr .>> spaces |>> Get
+        
+    let ifFunc =
+        between (pstring "?(") (pstring ")") (sepBy1 expr comma) |>> function
+        | [a;b;c] -> If (a,b,c)
+        | _ -> failwith "Expected exactly three elements"
     
     let nfunc =
         between (pstring "n(") (pstring ")") ruleIdent .>> spaces |>> Neighbour
         
     let cfunc =
         between (pstring "c(") (pstring ")") ( ruleIdent .>> comma .>>. expr) .>> spaces |>> Check
+    
+    let mfunc =
+        between (pstring "m(") (pstring ")") expr .>> spaces |>> Magnitude
+    
+    let ufunc =
+        between (pstring "u(") (pstring ")") expr .>> spaces |>> Unit
     
     let trueFunc =
         skipString "true" .>> spaces |>> True        
@@ -106,6 +120,9 @@ module ComplexMathLibrary.Parser
         cfunc
         falseFunc
         trueFunc
+        ifFunc
+        mfunc
+        ufunc
     ]
     
     opp.AddOperator <| InfixOperator("*", spaces, 1, Associativity.Left, fun x y -> Expr.Binary (x, y, BinaryExprKind.Multiply))
@@ -180,6 +197,25 @@ module ComplexMathLibrary.Parser
                 fun _ -> FCA.ComplexTrue
             | False unit ->
                 fun _ -> FCA.ComplexFalse
+            | If (condition, trueExpr, falseExpr) ->
+                let conditionEvaluated = (evaluate condition)
+                let trueExprEvaluated = (evaluate trueExpr)
+                let falseExprEvaluated = (evaluate falseExpr)
+                fun v ->
+                    if conditionEvaluated v = FCA.ComplexFalse then
+                        falseExprEvaluated v
+                        else trueExprEvaluated v
+            | Magnitude expr ->
+                let evaluated = evaluate expr
+                fun v ->
+                    Complex((evaluated v).Magnitude, 0)
+            | Unit expr ->
+                let evaluated = evaluate expr
+                fun v ->
+                    let res = evaluated v
+                    if(res = Complex.Zero) then Complex.Zero
+                    else res / res.Magnitude
+                    
         
         evaluate tokens
     //     

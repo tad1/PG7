@@ -11,7 +11,9 @@
     <ListBox ItemsSource="{Binding Rules.Values}" Background="#131313" Foreground="White" SelectedItem="{Binding SelectedRule}">
         <ListBox.ItemTemplate>
             <DataTemplate>
-                <TextBlock Foreground="White" Text="{Binding RuleStr}"/>
+                <UserControl MouseDoubleClick="Control_OnMouseDoubleClick">
+                    <TextBlock Foreground="White" Text="{Binding RuleStr}"/>
+                </UserControl>
             </DataTemplate>
         </ListBox.ItemTemplate>
     </ListBox>

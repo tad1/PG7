@@ -30,6 +30,7 @@
                 <Setter Property="Foreground" Value="White"/>
                 <Setter Property="Background" Value="#131313"/>
             </Style>
+            
             <Style TargetType="{x:Type Button}">
                 <Setter Property="Width" Value="70" />
                 <Setter Property="Height" Value="25" />
@@ -37,6 +38,7 @@
                 <Setter Property="Foreground" Value="White"/>
                 <Setter Property="Background" Value="#131313"/>
             </Style>
+            
         </Grid.Resources>
 
         <Grid.ColumnDefinitions>
@@ -60,8 +62,13 @@
         <Label Grid.Column="0" Grid.Row="3">Height:</Label>
         <TextBox Name="Height" Grid.Column="1" Grid.Row="3" />
 
+        <Label Grid.Column="0" Grid.Row="4">Type:</Label>
+        <ComboBox Grid.Column="1" Grid.Row="4" Name="GridType" Foreground="Black">
+            <ComboBoxItem IsSelected="True">Checked</ComboBoxItem>
+            <ComboBoxItem>Wrapped</ComboBoxItem>
+        </ComboBox>
         
-        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right">
+        <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Grid.Row="5" Orientation="Horizontal" HorizontalAlignment="Right">
             <Button Name="okButton" Click="okButton_Click" IsDefault="True">OK</Button>
             <Button Name="cancelButton" IsCancel="True">Cancel</Button>
         </StackPanel>

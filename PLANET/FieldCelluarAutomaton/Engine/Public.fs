@@ -30,10 +30,30 @@ type CheckedGrid =
 
     override this.Array = this.array;
 
+let modWrap x m =
+    (x % m + m) % m
+
+type WrappedGrid =
+    inherit FCA.Grid
+    new (w,h) = {inherit FCA.Grid(w,h)}
+    new (arr) = {inherit FCA.Grid(arr)}
+    override this.Item(x,y) =
+        let posx = modWrap x (this.array.GetUpperBound(0)+1)
+        let posy = modWrap y (this.array.GetUpperBound(1)+1)
+        this.array[posx, posy]
+
+    override this.Array = this.array;
 type GridUpdateHandler =
     Action
+    
+type GridType =
+    | Checked
+    | Wrapped
+    
+
 
 let gridUpdateHandlers : ResizeArray<GridUpdateHandler> = ResizeArray<GridUpdateHandler>()
+let mutable selectedType = Checked
 
 let mutable grid:FCA.Grid = CheckedGrid(10,10)
 let add_rule (input:string) : Result<_,string> =
@@ -49,12 +69,30 @@ let add_rule (input:string) : Result<_,string> =
             rulesetInfo <- rulesetInfo.Add(name, {RuleId = name; RuleStr = input })
             Ok()
         with
-        | Failure(msg) -> Error(msg)
+        | Failure(msg) ->
+            Console.WriteLine msg
+            Error(msg)
         
-let create_grid width height =
-    grid <- CheckedGrid(width, height)
     
+let create_grid width height =
+    match selectedType with
+    | Checked -> grid <- CheckedGrid(width, height) :> FCA.Grid
+    | Wrapped -> grid <- WrappedGrid(width, height) :> FCA.Grid
+
+let rec select_type new_grid_type =
+    selectedType <- new_grid_type
+    match selectedType with
+    | Checked -> grid <- CheckedGrid(grid.array)
+    | Wrapped -> grid <- WrappedGrid(grid.array)
+
 let apply (rule:FCA.RuleType) =
     let arr = grid.array |> Array2D.mapi (fun x y z -> rule (grid, Complex(x,y)))
-    grid <- CheckedGrid(arr)
+    match selectedType with
+    | Checked -> grid <- CheckedGrid(arr)
+    | Wrapped -> grid <- WrappedGrid(arr)
+    
+let clear_rules () =
+    ruleset <- Map.empty
+    rulesetInfo <- Map.empty
+    
     

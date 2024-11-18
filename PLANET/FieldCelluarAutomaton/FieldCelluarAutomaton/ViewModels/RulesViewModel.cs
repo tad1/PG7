@@ -41,6 +41,11 @@ public partial class RulesViewModel : ObservableObject
             OnPropertyChanged(nameof(rules));
         });
     }
+
+    public void ApplySelectedRule()
+    {
+        //TODO: QoL, apply selected rule on double click
+    }
     
     [RelayCommand]
     void Delete(string key)

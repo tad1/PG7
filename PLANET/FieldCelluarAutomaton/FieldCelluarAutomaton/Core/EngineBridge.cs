@@ -13,6 +13,7 @@ public class EngineBridge
     public EngineBridge(IBus bus)
     {
         _bus = bus;
+        _bus.RegisterSubscriptions(this);
         _bus.Subscribe<string>("selectedRule", s =>
         {
             _selectedRule = s;
@@ -55,5 +56,17 @@ public class EngineBridge
         Public.grid = new Public.CheckedGrid(grid);
         _bus.Publish<(int, int)>("gridSize", (grid.GetLength(0), grid.GetLength(1)));
         _bus.Publish<Event>("grid_updated", new Event());
+    }
+
+    public void ClearRules()
+    {
+        Public.clear_rules();
+        _bus.Publish<Event>("ruleset_updated", new Event());
+    }
+
+    [Subscribe("board_type")]
+    public void SelectGridType(Public.GridType gridType)
+    {
+        Public.select_type(gridType);
     }
 }

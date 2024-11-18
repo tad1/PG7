@@ -8,5 +8,6 @@ public struct CellModel
     public int RowIdx;
     public bool IsSelected { get; set; }
     public Complex Value { get; set; }
+    public double BoundedMagnitude { get; set; }
     public double Angle { get; set; }
 }

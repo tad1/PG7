@@ -41,6 +41,7 @@
             <TextBlock Width="50" Height="50" Text="→" x:Name="CellValue" Foreground="{StaticResource ForegroundBrush}"  HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="32">
                 <TextBlock.RenderTransform>
                     <TransformGroup>
+                        <ScaleTransform ScaleX="{Binding BoundedMagnitude}"></ScaleTransform>
                         <RotateTransform x:Name="RotateTransform" CenterX="12.5" CenterY="25" Angle="{Binding Angle}"/>
                         <TranslateTransform X="12.5"></TranslateTransform>
                     </TransformGroup>

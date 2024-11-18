@@ -41,3 +41,4 @@ module FCA =
     let p (offset:Complex) (field:Grid, position:Complex) =
         let pos = position + offset
         field[int pos.Real, int pos.Imaginary]
+

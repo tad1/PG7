@@ -53,10 +53,16 @@ expressions:
 		x - cell position
 		p(<EXPRESSION>) - relative cell value
 			p(-1) - returns value of left on the left - relative offset (-1, 0)
-		c(<RULE>, <EXPRESSION>) - returns logical value, 1+1i when rule
+		c(<RULE>, <EXPRESSION>) - applies rule, on relative offset cell - returns value from rule
 		n(<RULE>) - returns how many neighbour cells (3x3 grid) satisfy logic rule
 			i.e. n(R1,4) neighbour cells satisfy R1 -> returns 4+4i
-
+		?(<EXPRESSION>, <EXPRESSION>, <EXPRESSION>) - ?(condition, trueExpr, falseExpr) when condition is logical false, return falseExpr, otherwise returns trueExpr
+			?(x = 5+5i, 1i, 1) - sets 1i on (5,5) cell and 1 on all others 
+		m(<EXPRESSION>) - returns magnitude of expression
+			m(2+2i) = sqrt(2^2 + 2^2) + 0i
+		u(<EXPRESSION>) - returns unit vector of expression
+			u(5) = 0.707 + 0.707i
+			u(1+1i) = sqrt(2)
 	<LOGICAL_VALUE>
 		true
 			represent 1+1i
@@ -101,6 +107,7 @@ r[ule] R<x> - select rule
 a[pply] R<x> - apply rule
 p[lay]/start - run simulation
 stop/stp - stop simulation
+clear/clr/cls - clear board and rules
 
 
 new - clear game
@@ -110,7 +117,10 @@ new <X> <Y> - new X,Y rectangle grid
 	new 10 5 10x5 grid
 c[ell] X Y - select cell
 
-disp[lay] <n[umber]/b[oolean]/a[rrow]>
+disp[lay] <n[umber]/b[oolean]/a[rrow]> - change cell display
+t[ype] <c[hecked]/w[rapped]> - change board type
+	checked - all values beyond is zero (0+0i)
+	wrapped - board is connected to opposite sides
 
 save [name] - save to save directory (default quicksave)
 load [name] - load from directory

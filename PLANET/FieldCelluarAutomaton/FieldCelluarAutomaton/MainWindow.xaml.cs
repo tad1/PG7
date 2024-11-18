@@ -78,7 +78,7 @@ public partial class MainWindow : Window, ILoad
             .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true);
         
         Configuration = builder.Build();
-        saveDir = Configuration["AppSettings:SaveDirectory"] ?? "saves";
+        saveDir = Configuration["AppSettings:SaveDirectory"] ?? "../../../../saves";
         
         InitializeComponent();
         DisplayMenuItems = new[]

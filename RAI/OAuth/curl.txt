@@ -1,0 +1,1 @@
+curl -H "authorization: Bearer 017286f7527ee078ab4be2494efbba0495cf86d43fba232286f847ccfda00fbe"  http://localhost:3000/read-resource

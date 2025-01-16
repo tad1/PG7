@@ -1,0 +1,2 @@
+http://localhost:1337/books?$filter=title eq 'string2'
+http://localhost:1337/books('string2')
